@@ -3,23 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
+
+	"github.com/mikepepping/daily-goggles/cmds"
 )
 
-type Command interface {
-	Execute(args []string)
-}
-
-
-type PrintCommand struct {}
-
-func (pc PrintCommand) Execute(args []string) {
-	if len(args) == 0 {
-		fmt.Println("Missing string to print")
-		os.Exit(1)
-	}
-	fmt.Println(strings.Join(args, " "))
-}
 
 func main() {
 	cmdArgs := os.Args[1:]
@@ -28,8 +15,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	commands := map[string]Command{
-		"print": PrintCommand{},
+	commands := map[string]cmds.Command{
+		"print": cmds.PrintCmd{},
 	}
 
 	cmd := commands[cmdArgs[0]]
