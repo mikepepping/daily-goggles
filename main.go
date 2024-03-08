@@ -7,6 +7,19 @@ import (
 	"github.com/mikepepping/daily-goggles/cmds"
 )
 
+var config = cmds.CmdConfig{
+	"~/.daily-goggles",
+	"store.json",
+}
+
+func getCmd(name string) cmds.Command {
+	buildCmd := map[string]cmds.BuildFunc{
+		"print": cmds.BuildPrintCmd,
+		"insert": cmds.BuildInsertCmd,
+	}[name]
+
+	return buildCmd(config)
+}
 
 func main() {
 	cmdArgs := os.Args[1:]
