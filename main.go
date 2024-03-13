@@ -8,13 +8,13 @@ import (
 )
 
 var config = cmds.CmdConfig{
-	"~/.daily-goggles",
-	"store.json",
+	StorePath:     "/home/michael/.daily-goggles",
+	StoreFilename: "store.json",
 }
 
 func getCmd(name string) cmds.Command {
 	buildCmd := map[string]cmds.BuildFunc{
-		"print": cmds.BuildPrintCmd,
+		"print":  cmds.BuildPrintCmd,
 		"insert": cmds.BuildInsertCmd,
 	}[name]
 
@@ -28,12 +28,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	commands := map[string]cmds.Command{
-		"print": cmds.PrintCmd{},
+	cmd := getCmd(cmdArgs[0])
+	if err := cmd.Execute(cmdArgs[1:]); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
-
-	cmd := commands[cmdArgs[0]]
-	cmd.Execute(cmdArgs[1:])
 
 	os.Exit(0)
 }
