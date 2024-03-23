@@ -1,9 +1,12 @@
 package cmds
 
 import (
+	"os"
 	"errors"
 	"fmt"
-	"strings"
+	"path/filepath"
+
+	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
 
 type PrintCmd struct {
@@ -14,11 +17,28 @@ func BuildPrintCmd(config CmdConfig) Command {
 	return PrintCmd{config}
 }
 
-func (pc PrintCmd) Execute(args []string) error {
-	if len(args) == 0 {
-		fmt.Println("Missing string to print")
-		return errors.New("missing string to print")
+func (pc PrintCmd) Execute(_ []string) error {
+	if pc.config.StoreFilename == "" {
+		return errors.New("empty store filename")
 	}
-	fmt.Println(strings.Join(args, " "))
+
+	tf := tasks.BuildTaskFile()
+	fpath := filepath.Join(pc.config.StorePath, pc.config.StoreFilename)
+
+	if _, err := os.Stat(fpath); err != nil {
+		if err = tf.SaveToFile(fpath); err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	if err := tf.LoadFromFile(fpath); err != nil {
+		return err
+	}
+
+	for _, task := range tf.Tasks {
+		fmt.Println("Task:", task.Name, "State:", task.State)
+	}
+
 	return nil
 }

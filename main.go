@@ -3,16 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/mikepepping/daily-goggles/cmds"
 )
 
-var config = cmds.CmdConfig{
-	StorePath:     "/home/michael/.daily-goggles",
-	StoreFilename: "store.json",
-}
 
-func getCmd(name string) cmds.Command {
+func getCmd(name string, config cmds.CmdConfig) cmds.Command {
 	buildCmd := map[string]cmds.BuildFunc{
 		"print":  cmds.BuildPrintCmd,
 		"insert": cmds.BuildInsertCmd,
@@ -28,7 +25,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	cmd := getCmd(cmdArgs[0])
+	var homeDir, err = os.UserHomeDir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+
+	var config = cmds.CmdConfig{
+		StorePath:     filepath.Join(homeDir, ".daily-goggles"),
+		StoreFilename: "store.json",
+	}
+
+	cmd := getCmd(cmdArgs[0], config)
 	if err := cmd.Execute(cmdArgs[1:]); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

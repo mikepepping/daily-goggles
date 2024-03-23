@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -30,23 +29,26 @@ func (ic InsertCmd) Execute(args []string) error {
 	if _, err := os.Stat(fpath); err != nil {
 		if err = ic.createTaskFile(); err != nil {
 			fmt.Println(err)
-			return errors.New("failed to create new task file")
+			return err
 		}
 	}
 
-	tf, err := ic.readTaskFile()
-	if err != nil {
-		return errors.New("failed to read task file")
+	var tf = tasks.BuildTaskFile()
+	if err := tf.LoadFromFile(fpath); err != nil {
+		return errors.New("failed to load task file")
 	}
 
-	newTask := tasks.Task{
+	tf.AppendTask(tasks.Task{
 		Name:   strings.Join(args, " "),
 		State:  tasks.Todo,
 		DoneAt: time.Time{},
+	})
+
+	if err := tf.SaveToFile(fpath); err != nil {
+		return errors.New("failed to save task file")
 	}
 
-	tf.Tasks = append(tf.Tasks, newTask)
-	return ic.writeTaskFile(tf)
+	return nil
 }
 
 func (ic InsertCmd) createTaskFile() error {
@@ -59,57 +61,11 @@ func (ic InsertCmd) createTaskFile() error {
 
 	fpath := filepath.Join(ic.config.StorePath, ic.config.StoreFilename)
 
-	fmt.Println("Creating new store file")
-	file, err := os.Create(fpath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	template, err := json.Marshal(tasks.TaskFile{Tasks: []tasks.Task{}})
-	if err != nil {
-		return errors.New("failed to stringify template")
-	}
-
-	_, err = file.WriteString(string(template))
-	if err != nil {
-		return errors.New("failed to save new blank template")
+	tf := tasks.BuildTaskFile()
+	if err := tf.SaveToFile(fpath); err != nil {
+		return errors.New("failed to save new task file")
 	}
 
 	return nil
 }
 
-func (ic InsertCmd) readTaskFile() (tasks.TaskFile, error) {
-	fpath := filepath.Join(ic.config.StorePath, ic.config.StoreFilename)
-	data, err := os.ReadFile(fpath)
-	if err != nil {
-		return tasks.TaskFile{}, errors.New("failed to read task file")
-	}
-
-	var tf tasks.TaskFile
-	if err = json.Unmarshal(data, &tf); err != nil {
-		return tasks.TaskFile{}, errors.New("failed to deserialize task file")
-	}
-
-	return tf, nil
-}
-
-func (ic InsertCmd) writeTaskFile(tf tasks.TaskFile) error {
-	jsonstr, err := tf.Stringify()
-	if err != nil {
-		return errors.New("failed to stringify task file")
-	}
-
-	file, err := os.Create(filepath.Join(ic.config.StorePath, ic.config.StorePath))
-	if err != nil {
-		// TODO : Failing here at the moment
-		return errors.New("failed to open task file for writing")
-	}
-
-	_, err = file.WriteString(jsonstr)
-	if err != nil {
-		return errors.New("failed to write to task file")
-	}
-
-	return nil
-}
