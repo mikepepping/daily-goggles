@@ -8,11 +8,11 @@ import (
 	"github.com/mikepepping/daily-goggles/cmds"
 )
 
-
 func getCmd(name string, config cmds.CmdConfig) cmds.Command {
 	buildCmd := map[string]cmds.BuildFunc{
-		"print":  cmds.BuildPrintCmd,
-		"insert": cmds.BuildInsertCmd,
+		"print":    cmds.BuildPrintCmd,
+		"insert":   cmds.BuildInsertCmd,
+		"complete": cmds.BuildCompleteCmd,
 	}[name]
 
 	return buildCmd(config)
@@ -30,7 +30,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 
 	var config = cmds.CmdConfig{
 		StorePath:     filepath.Join(homeDir, ".daily-goggles"),
