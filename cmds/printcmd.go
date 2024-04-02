@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
@@ -43,37 +41,7 @@ func (pc PrintCmd) Execute(_ []string) error {
 		return nil
 	}
 
-	pc.printTasks(tf.Tasks)
+	PrintTable(tf.Tasks)
 
 	return nil
-}
-
-func (pc PrintCmd) printTasks(tsks []tasks.Task) {
-	// first find the longest length of each attribute as a string
-	iid := 0
-	iname := 1
-
-	lengths := []int{0, 0}
-
-	for i, tsk := range tsks {
-		lengths[iid] = len(strconv.Itoa(i))
-
-		if nLen := len(tsk.Name); nLen > lengths[iname] {
-			lengths[iname] = nLen
-		}
-	}
-
-	// print the table with all columns as equal length
-	for i, tsk := range tsks {
-		id := strconv.Itoa(i)
-		id = padRight(id, lengths[iid], " ")
-		name := padRight(tsk.Name, lengths[iname], " ")
-		fmt.Println("|", id, "|", name, "|", tsk.State)
-	}
-}
-
-func padRight(str string, maxLength int, pad string) string {
-	padLen := maxLength - len(str)
-	padding := strings.Repeat(pad, padLen)
-	return str + padding
 }

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mikepepping/daily-goggles/cmds"
+	cmds "github.com/mikepepping/daily-goggles/cmds"
 )
 
 func getCmd(name string, config cmds.CmdConfig) cmds.Command {
@@ -13,6 +13,8 @@ func getCmd(name string, config cmds.CmdConfig) cmds.Command {
 		"print":    cmds.BuildPrintCmd,
 		"insert":   cmds.BuildInsertCmd,
 		"complete": cmds.BuildCompleteCmd,
+		"clean":    cmds.BuildCleanCmd,
+		"history":  cmds.BuildHistoryCmd,
 	}[name]
 
 	return buildCmd(config)
