@@ -1,0 +1,6 @@
+alias dg="~/.daily-goggles/dg"
+alias dgp="~/.daily-goggles/dg print"
+alias dgcln="~/.daily-goggles/dg clean"
+alias dgi="~/.daily-goggles/dg insert"
+alias dgc="~/.daily-goggles/dg complete"
+alias dgh="~/.daily-goggles/dg history"
