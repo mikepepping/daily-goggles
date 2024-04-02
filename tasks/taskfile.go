@@ -1,13 +1,14 @@
 package tasks
 
 import (
-	"os"
 	"encoding/json"
 	"errors"
+	"os"
 )
 
 type TaskFile struct {
-	Tasks []Task `json:"tasks"`
+	Tasks   []Task `json:"tasks"`
+	History []Task `json:"history"`
 }
 
 func BuildTaskFile() TaskFile {
@@ -16,6 +17,23 @@ func BuildTaskFile() TaskFile {
 
 func (tf *TaskFile) AppendTask(task Task) {
 	tf.Tasks = append(tf.Tasks, task)
+}
+
+// Clean - moves all 'done' tasks and places them in the history
+func (tf *TaskFile) Clean() {
+	done := []Task{}
+	todo := []Task{}
+
+	for _, t := range tf.Tasks {
+		if t.State == Done {
+			done = append(done, t) // This is probably slow
+		} else {
+			todo = append(todo, t) //this is probably slow
+		}
+	}
+
+	tf.Tasks = todo
+	tf.History = append(tf.History, done...)
 }
 
 func (tf TaskFile) stringify() (string, error) {
@@ -27,14 +45,14 @@ func (tf TaskFile) stringify() (string, error) {
 	return string(str), nil
 }
 
-func (tf *TaskFile) LoadFromFile(fpath string) (error) {
+func (tf *TaskFile) LoadFromFile(fpath string) error {
 	data, err := os.ReadFile(fpath)
 	if err != nil {
-		errors.New("failed to read task file")
+		return errors.New("failed to read task file")
 	}
 
 	if err = json.Unmarshal(data, tf); err != nil {
-		errors.New("failed to deserialize task file")
+		return errors.New("failed to deserialize task file")
 	}
 
 	if tf.Tasks == nil {
