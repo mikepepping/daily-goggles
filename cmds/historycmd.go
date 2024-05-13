@@ -3,8 +3,10 @@ package cmds
 import (
 	"errors"
 	"path/filepath"
+	"strconv"
 
 	tasks "github.com/mikepepping/daily-goggles/tasks"
+	"github.com/mikepepping/daily-goggles/termtables"
 )
 
 type HistoryCmd struct {
@@ -23,7 +25,17 @@ func (hc HistoryCmd) Execute(_ []string) error {
 		return errors.New("failed to load task file")
 	}
 
-	PrintTable(tf.History)
+	table := termtables.Table{}
+	table.Resize(4)
+	table.SetHeadings([]string{"ID", "NAME", "STATUS", "DONE AT"})
+	for i, task := range tf.History {
+		doneAt := ""
+		if !task.DoneAt.IsZero() {
+			doneAt = task.DoneAt.String()
+		}
 
+		table.AddRow([]string{strconv.Itoa(i), task.Name, string(task.State), doneAt})
+	}
+	table.Print()
 	return nil
 }
