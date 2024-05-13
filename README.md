@@ -1,5 +1,5 @@
 # Daily Goggles
-Simple check list CLI tool written in Go for the funs.
+Simple check list CLI tool written in Go for the learning experience.
 
 The goal is to write this tool with a little external depedencies as possible, trying to stick to just the standard lib.
 
