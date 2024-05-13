@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	tasks "github.com/mikepepping/daily-goggles/tasks"
+	"github.com/mikepepping/daily-goggles/termtables"
 )
 
 type PrintCmd struct {
@@ -41,7 +43,18 @@ func (pc PrintCmd) Execute(_ []string) error {
 		return nil
 	}
 
-	PrintTable(tf.Tasks)
+	table := termtables.Table{}
+	table.Resize(4)
+	table.SetHeadings([]string{"ID", "NAME", "STATUS", "DONE AT"})
+	for i, task := range tf.Tasks {
+		doneAt := ""
+		if !task.DoneAt.IsZero() {
+			doneAt = task.DoneAt.String()
+		}
+
+		table.AddRow([]string{strconv.Itoa(i), task.Name, string(task.State), doneAt})
+	}
+	table.Print()
 
 	return nil
 }
