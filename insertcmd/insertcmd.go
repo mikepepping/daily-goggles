@@ -1,4 +1,4 @@
-package cmds
+package insertcmd
 
 import (
 	"errors"
@@ -8,14 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mikepepping/daily-goggles/cmds"
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
 
 type InsertCmd struct {
-	config CmdConfig
+	config cmds.Config
 }
 
-func BuildInsertCmd(config CmdConfig) Command {
+func New(config cmds.Config) cmds.Command {
 	return InsertCmd{config}
 }
 
@@ -68,4 +69,3 @@ func (ic InsertCmd) createTaskFile() error {
 
 	return nil
 }
-

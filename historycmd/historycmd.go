@@ -1,19 +1,20 @@
-package cmds
+package historycmd
 
 import (
 	"errors"
 	"path/filepath"
 	"strconv"
 
+	"github.com/mikepepping/daily-goggles/cmds"
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 	"github.com/mikepepping/daily-goggles/termtables"
 )
 
 type HistoryCmd struct {
-	config CmdConfig
+	config cmds.Config
 }
 
-func BuildHistoryCmd(config CmdConfig) Command {
+func New(config cmds.Config) cmds.Command {
 	return HistoryCmd{config}
 }
 

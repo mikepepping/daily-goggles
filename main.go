@@ -5,16 +5,21 @@ import (
 	"os"
 	"path/filepath"
 
-	cmds "github.com/mikepepping/daily-goggles/cmds"
+	"github.com/mikepepping/daily-goggles/cleancmd"
+	"github.com/mikepepping/daily-goggles/cmds"
+	"github.com/mikepepping/daily-goggles/completecmd"
+	"github.com/mikepepping/daily-goggles/historycmd"
+	"github.com/mikepepping/daily-goggles/insertcmd"
+	"github.com/mikepepping/daily-goggles/printcmd"
 )
 
-func getCmd(name string, config cmds.CmdConfig) cmds.Command {
+func getCmd(name string, config cmds.Config) cmds.Command {
 	buildCmd := map[string]cmds.BuildFunc{
-		"print":    cmds.BuildPrintCmd,
-		"insert":   cmds.BuildInsertCmd,
-		"complete": cmds.BuildCompleteCmd,
-		"clean":    cmds.BuildCleanCmd,
-		"history":  cmds.BuildHistoryCmd,
+		"print":    printcmd.New,
+		"insert":   insertcmd.New,
+		"complete": completecmd.New,
+		"clean":    cleancmd.New,
+		"history":  historycmd.New,
 	}[name]
 
 	return buildCmd(config)
@@ -33,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var config = cmds.CmdConfig{
+	var config = cmds.Config{
 		StorePath:     filepath.Join(homeDir, ".daily-goggles"),
 		StoreFilename: "store.json",
 	}

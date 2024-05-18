@@ -1,18 +1,19 @@
-package cmds
+package cleancmd
 
 import (
 	"errors"
 	"fmt"
 	"path/filepath"
 
+	"github.com/mikepepping/daily-goggles/cmds"
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
 
 type CleanCmd struct {
-	config CmdConfig
+	config cmds.Config
 }
 
-func BuildCleanCmd(config CmdConfig) Command {
+func New(config cmds.Config) cmds.Command {
 	return CleanCmd{config}
 }
 

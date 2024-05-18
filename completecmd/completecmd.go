@@ -1,4 +1,4 @@
-package cmds
+package completecmd
 
 import (
 	"errors"
@@ -7,14 +7,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mikepepping/daily-goggles/cmds"
 	"github.com/mikepepping/daily-goggles/tasks"
 )
 
 type CompleteCmd struct {
-	config CmdConfig
+	config cmds.Config
 }
 
-func BuildCompleteCmd(config CmdConfig) Command {
+func New(config cmds.Config) cmds.Command {
 	return CompleteCmd{config}
 }
 

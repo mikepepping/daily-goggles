@@ -1,4 +1,4 @@
-package cmds
+package printcmd
 
 import (
 	"errors"
@@ -7,15 +7,16 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/mikepepping/daily-goggles/cmds"
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 	"github.com/mikepepping/daily-goggles/termtables"
 )
 
 type PrintCmd struct {
-	config CmdConfig
+	config cmds.Config
 }
 
-func BuildPrintCmd(config CmdConfig) Command {
+func New(config cmds.Config) cmds.Command {
 	return PrintCmd{config}
 }
 
