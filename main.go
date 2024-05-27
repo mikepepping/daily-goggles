@@ -8,6 +8,7 @@ import (
 	"github.com/mikepepping/daily-goggles/cleancmd"
 	"github.com/mikepepping/daily-goggles/cmds"
 	"github.com/mikepepping/daily-goggles/completecmd"
+	"github.com/mikepepping/daily-goggles/deletecmd"
 	"github.com/mikepepping/daily-goggles/historycmd"
 	"github.com/mikepepping/daily-goggles/insertcmd"
 	"github.com/mikepepping/daily-goggles/printcmd"
@@ -18,6 +19,7 @@ func getCmd(name string, config cmds.Config) cmds.Command {
 		"print":    printcmd.New,
 		"insert":   insertcmd.New,
 		"complete": completecmd.New,
+		"delete":   deletecmd.New,
 		"clean":    cleancmd.New,
 		"history":  historycmd.New,
 	}[name]
