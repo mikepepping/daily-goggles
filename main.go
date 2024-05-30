@@ -12,19 +12,19 @@ import (
 	"github.com/mikepepping/daily-goggles/historycmd"
 	"github.com/mikepepping/daily-goggles/insertcmd"
 	"github.com/mikepepping/daily-goggles/printcmd"
+	"github.com/mikepepping/daily-goggles/wipecmd"
 )
 
 func getCmd(name string, config cmds.Config) cmds.Command {
-	buildCmd := map[string]cmds.BuildFunc{
+	return map[string]cmds.BuildFunc{
 		"print":    printcmd.New,
 		"insert":   insertcmd.New,
 		"complete": completecmd.New,
 		"delete":   deletecmd.New,
 		"clean":    cleancmd.New,
 		"history":  historycmd.New,
-	}[name]
-
-	return buildCmd(config)
+		"wipe":     wipecmd.New,
+	}[name](config)
 }
 
 func main() {
