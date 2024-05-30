@@ -2,6 +2,7 @@ package historycmd
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 	"strconv"
 
@@ -24,6 +25,11 @@ func (hc HistoryCmd) Execute(_ []string) error {
 	fpath := filepath.Join(hc.config.StorePath, hc.config.StoreFilename)
 	if err := tf.LoadFromFile(fpath); err != nil {
 		return errors.New("failed to load task file")
+	}
+
+	if len(tf.History) == 0 {
+		fmt.Println("No tasks")
+		return nil
 	}
 
 	table := termtables.Table{}
