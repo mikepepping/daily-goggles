@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,16 +16,27 @@ import (
 	"github.com/mikepepping/daily-goggles/wipecmd"
 )
 
-func getCmd(name string, config cmds.Config) cmds.Command {
-	return map[string]cmds.BuildFunc{
+func getCmd(name string, config cmds.Config) (cmds.Command, error) {
+	availableCmds := map[string]cmds.BuildFunc{
+		"list":     printcmd.New,
+		"ls":       printcmd.New,
 		"print":    printcmd.New,
+		"add":      insertcmd.New,
 		"insert":   insertcmd.New,
 		"complete": completecmd.New,
 		"delete":   deletecmd.New,
+		"remove":   deletecmd.New,
 		"clean":    cleancmd.New,
 		"history":  historycmd.New,
 		"wipe":     wipecmd.New,
-	}[name](config)
+	}
+
+	buildFunc, exists := availableCmds[name]
+	if !exists {
+		return nil, errors.New("command not found.")
+	}
+
+	return buildFunc((config)), nil
 }
 
 func main() {
@@ -45,7 +57,12 @@ func main() {
 		StoreFilename: "store.json",
 	}
 
-	cmd := getCmd(cmdArgs[0], config)
+	cmd, err := getCmd(cmdArgs[0], config)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	if err := cmd.Execute(cmdArgs[1:]); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
