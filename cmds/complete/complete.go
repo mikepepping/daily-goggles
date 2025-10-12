@@ -1,24 +1,25 @@
-package deletecmd
+package Complete
 
 import (
 	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/mikepepping/daily-goggles/cmds"
 	"github.com/mikepepping/daily-goggles/tasks"
 )
 
-type DeleteCmd struct {
+type Complete struct {
 	config cmds.Config
 }
 
 func New(config cmds.Config) cmds.Command {
-	return DeleteCmd{config}
+	return Complete{config}
 }
 
-func (pc DeleteCmd) Execute(args []string) error {
+func (pc Complete) Execute(args []string) error {
 	if pc.config.StoreFilename == "" {
 		return errors.New("empty store filename")
 	}
@@ -44,13 +45,12 @@ func (pc DeleteCmd) Execute(args []string) error {
 		return nil
 	}
 
-	task := tf.Tasks[taskIndex]
-
-	tf.Tasks = append(tf.Tasks[:taskIndex], tf.Tasks[taskIndex+1:]...)
+	tf.Tasks[taskIndex].State = "done"
+	tf.Tasks[taskIndex].DoneAt = time.Now()
 
 	tf.SaveToFile(fpath)
 
-	fmt.Println("Deleted: " + task.Name)
+	fmt.Println("Marked " + tf.Tasks[taskIndex].Name + " as done.")
 
 	return nil
 }

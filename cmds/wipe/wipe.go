@@ -9,15 +9,15 @@ import (
 	"github.com/mikepepping/daily-goggles/tasks"
 )
 
-type WipeCmd struct {
+type Wipe struct {
 	config cmds.Config
 }
 
 func New(config cmds.Config) cmds.Command {
-	return WipeCmd{config}
+	return Wipe{config}
 }
 
-func (pc WipeCmd) Execute(args []string) error {
+func (pc Wipe) Execute(args []string) error {
 	if pc.config.StoreFilename == "" {
 		return errors.New("empty store filename")
 	}

@@ -1,8 +1,9 @@
-package historycmd
+package printcmd
 
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -11,23 +12,34 @@ import (
 	"github.com/mikepepping/daily-goggles/termtables"
 )
 
-type HistoryCmd struct {
+type Print struct {
 	config cmds.Config
 }
 
 func New(config cmds.Config) cmds.Command {
-	return HistoryCmd{config}
+	return Print{config}
 }
 
-func (hc HistoryCmd) Execute(_ []string) error {
-	tf := tasks.BuildTaskFile()
-
-	fpath := filepath.Join(hc.config.StorePath, hc.config.StoreFilename)
-	if err := tf.LoadFromFile(fpath); err != nil {
-		return errors.New("failed to load task file")
+func (pc Print) Execute(_ []string) error {
+	if pc.config.StoreFilename == "" {
+		return errors.New("empty store filename")
 	}
 
-	if len(tf.History) == 0 {
+	tf := tasks.BuildTaskFile()
+	fpath := filepath.Join(pc.config.StorePath, pc.config.StoreFilename)
+
+	if _, err := os.Stat(fpath); err != nil {
+		if err = tf.SaveToFile(fpath); err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	if err := tf.LoadFromFile(fpath); err != nil {
+		return err
+	}
+
+	if len(tf.Tasks) == 0 {
 		fmt.Println("No tasks")
 		return nil
 	}
@@ -35,7 +47,7 @@ func (hc HistoryCmd) Execute(_ []string) error {
 	table := termtables.Table{}
 	table.Resize(4)
 	table.SetHeadings([]string{"ID", "NAME", "STATUS", "DONE AT"})
-	for i, task := range tf.History {
+	for i, task := range tf.Tasks {
 		doneAt := ""
 		if !task.DoneAt.IsZero() {
 			doneAt = task.DoneAt.String()
@@ -44,5 +56,6 @@ func (hc HistoryCmd) Execute(_ []string) error {
 		table.AddRow([]string{strconv.Itoa(i), task.Name, string(task.State), doneAt})
 	}
 	table.Print()
+
 	return nil
 }

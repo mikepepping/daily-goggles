@@ -12,15 +12,15 @@ import (
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
 
-type InsertCmd struct {
+type Insert struct {
 	config cmds.Config
 }
 
 func New(config cmds.Config) cmds.Command {
-	return InsertCmd{config}
+	return Insert{config}
 }
 
-func (ic InsertCmd) Execute(args []string) error {
+func (ic Insert) Execute(args []string) error {
 	if ic.config.StoreFilename == "" {
 		return errors.New("empty store filename")
 	}
@@ -52,7 +52,7 @@ func (ic InsertCmd) Execute(args []string) error {
 	return nil
 }
 
-func (ic InsertCmd) createTaskFile() error {
+func (ic Insert) createTaskFile() error {
 	fmt.Println("Creating Task Store")
 	fmt.Println("Creating new store directory")
 	fmt.Println(ic.config.StorePath)

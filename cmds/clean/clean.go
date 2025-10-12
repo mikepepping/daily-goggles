@@ -1,4 +1,4 @@
-package cleancmd
+package clean
 
 import (
 	"errors"
@@ -9,15 +9,15 @@ import (
 	tasks "github.com/mikepepping/daily-goggles/tasks"
 )
 
-type CleanCmd struct {
+type Clean struct {
 	config cmds.Config
 }
 
 func New(config cmds.Config) cmds.Command {
-	return CleanCmd{config}
+	return Clean{config}
 }
 
-func (cc CleanCmd) Execute(_ []string) error {
+func (cc Clean) Execute(_ []string) error {
 	tf := tasks.BuildTaskFile()
 
 	fpath := filepath.Join(cc.config.StorePath, cc.config.StoreFilename)

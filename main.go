@@ -6,34 +6,34 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mikepepping/daily-goggles/cleancmd"
 	"github.com/mikepepping/daily-goggles/cmds"
-	"github.com/mikepepping/daily-goggles/completecmd"
-	"github.com/mikepepping/daily-goggles/deletecmd"
-	"github.com/mikepepping/daily-goggles/historycmd"
-	"github.com/mikepepping/daily-goggles/insertcmd"
-	"github.com/mikepepping/daily-goggles/printcmd"
-	"github.com/mikepepping/daily-goggles/wipecmd"
+	clean "github.com/mikepepping/daily-goggles/cmds/clean"
+	complete "github.com/mikepepping/daily-goggles/cmds/complete"
+	delete "github.com/mikepepping/daily-goggles/cmds/delete"
+	history "github.com/mikepepping/daily-goggles/cmds/history"
+	insert "github.com/mikepepping/daily-goggles/cmds/insert"
+	print "github.com/mikepepping/daily-goggles/cmds/print"
+	wipe "github.com/mikepepping/daily-goggles/cmds/wipe"
 )
 
 func getCmd(name string, config cmds.Config) (cmds.Command, error) {
 	availableCmds := map[string]cmds.BuildFunc{
-		"list":     printcmd.New,
-		"ls":       printcmd.New,
-		"print":    printcmd.New,
-		"add":      insertcmd.New,
-		"insert":   insertcmd.New,
-		"complete": completecmd.New,
-		"delete":   deletecmd.New,
-		"remove":   deletecmd.New,
-		"clean":    cleancmd.New,
-		"history":  historycmd.New,
-		"wipe":     wipecmd.New,
+		"list":     print.New,
+		"ls":       print.New,
+		"print":    print.New,
+		"add":      insert.New,
+		"insert":   insert.New,
+		"complete": complete.New,
+		"delete":   delete.New,
+		"remove":   delete.New,
+		"clean":    clean.New,
+		"history":  history.New,
+		"wipe":     wipe.New,
 	}
 
 	buildFunc, exists := availableCmds[name]
 	if !exists {
-		return nil, errors.New("command not found.")
+		return nil, errors.New("command not found")
 	}
 
 	return buildFunc((config)), nil
