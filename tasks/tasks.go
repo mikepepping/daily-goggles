@@ -11,6 +11,7 @@ type TaskState string
 const (
 	Todo       TaskState = "todo"
 	InProgress TaskState = "in-progress"
+	InReview   TaskState = "in-review"
 	Done       TaskState = "done"
 )
 

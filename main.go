@@ -14,6 +14,7 @@ import (
 	history "github.com/mikepepping/daily-goggles/cmds/history"
 	insert "github.com/mikepepping/daily-goggles/cmds/insert"
 	print "github.com/mikepepping/daily-goggles/cmds/print"
+	publish "github.com/mikepepping/daily-goggles/cmds/publish"
 	wipe "github.com/mikepepping/daily-goggles/cmds/wipe"
 	"github.com/mikepepping/daily-goggles/store"
 )
@@ -28,6 +29,7 @@ func getCmd(name string, resources cmds.Resources) (cmds.Command, error) {
 		"complete": complete.New,
 		"begin":    begin.New,
 		"start":    begin.New,
+		"publish":  publish.New,
 		"delete":   delete.New,
 		"remove":   delete.New,
 		"clean":    clean.New,
