@@ -54,7 +54,7 @@ func main() {
 
 	var config = cmds.Config{
 		StorePath:     filepath.Join(homeDir, ".daily-goggles"),
-		StoreFilename: "store.json",
+		StoreFilename: "store.db",
 	}
 
 	cmd, err := getCmd(cmdArgs[0], config)

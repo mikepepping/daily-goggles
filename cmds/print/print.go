@@ -1,61 +1,52 @@
 package printcmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/mikepepping/daily-goggles/cmds"
-	tasks "github.com/mikepepping/daily-goggles/tasks"
+	"github.com/mikepepping/daily-goggles/store"
+	"github.com/mikepepping/daily-goggles/tasks"
 	"github.com/mikepepping/daily-goggles/termtables"
 )
 
-type Print struct {
-	config cmds.Config
-}
+type Print struct{ config cmds.Config }
 
-func New(config cmds.Config) cmds.Command {
-	return Print{config}
-}
+func New(config cmds.Config) cmds.Command { return Print{config} }
 
-func (pc Print) Execute(_ []string) error {
-	if pc.config.StoreFilename == "" {
+func (c Print) Execute(_ []string) error {
+	if c.config.StoreFilename == "" {
 		return errors.New("empty store filename")
 	}
-
-	tf := tasks.BuildTaskFile()
-	fpath := filepath.Join(pc.config.StorePath, pc.config.StoreFilename)
-
-	if _, err := os.Stat(fpath); err != nil {
-		if err = tf.SaveToFile(fpath); err != nil {
-			fmt.Println(err)
-			return err
-		}
-	}
-
-	if err := tf.LoadFromFile(fpath); err != nil {
+	db, err := cmds.Open(c.config)
+	if err != nil {
 		return err
 	}
-
-	if len(tf.Tasks) == 0 {
+	defer db.Close()
+	rows, err := store.NewTaskRepo(db).List(context.Background())
+	if err != nil {
+		return err
+	}
+	if len(rows) == 0 {
 		fmt.Println("No tasks")
 		return nil
 	}
+	printRows(rows)
+	return nil
+}
 
+func printRows(rows []tasks.Task) {
 	table := termtables.Table{}
 	table.Resize(4)
 	table.SetHeadings([]string{"ID", "NAME", "STATUS", "DONE AT"})
-	for i, task := range tf.Tasks {
+	for i, task := range rows {
 		doneAt := ""
 		if !task.DoneAt.IsZero() {
 			doneAt = task.DoneAt.String()
 		}
-
 		table.AddRow([]string{strconv.Itoa(i), task.Name, string(task.State), doneAt})
 	}
 	table.Print()
-
-	return nil
 }

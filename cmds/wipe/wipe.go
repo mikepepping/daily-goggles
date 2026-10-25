@@ -1,44 +1,32 @@
 package wipecmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"path/filepath"
 
 	"github.com/mikepepping/daily-goggles/cmds"
-	"github.com/mikepepping/daily-goggles/tasks"
 )
 
-type Wipe struct {
-	config cmds.Config
-}
+type Wipe struct{ config cmds.Config }
 
-func New(config cmds.Config) cmds.Command {
-	return Wipe{config}
-}
-
-func (pc Wipe) Execute(args []string) error {
-	if pc.config.StoreFilename == "" {
+func New(config cmds.Config) cmds.Command { return Wipe{config} }
+func (c Wipe) Execute(_ []string) error {
+	if c.config.StoreFilename == "" {
 		return errors.New("empty store filename")
 	}
-
-	fpath := filepath.Join(pc.config.StorePath, pc.config.StoreFilename)
-	tf := tasks.BuildTaskFile()
-	if err := tf.LoadFromFile(fpath); err != nil {
+	db, err := cmds.Open(c.config)
+	if err != nil {
 		return err
 	}
-
-	if len(tf.Tasks) == 0 {
-		fmt.Println("No tasks")
-		return nil
+	defer db.Close()
+	_, err = db.ExecContext(context.Background(), "DELETE FROM tasks")
+	if err == nil {
+		_, err = db.ExecContext(context.Background(), "DELETE FROM history")
 	}
-
-	tf.Tasks = make([]tasks.Task, 0)
-	tf.History = make([]tasks.Task, 0)
-
-	tf.SaveToFile(fpath)
-
+	if err != nil {
+		return err
+	}
 	fmt.Println("All Tasks have been wiped including history")
-
 	return nil
 }
