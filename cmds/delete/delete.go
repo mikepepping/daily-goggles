@@ -9,15 +9,13 @@ import (
 
 	"github.com/mikepepping/daily-goggles/cmds"
 	"github.com/mikepepping/daily-goggles/store"
+	"github.com/mikepepping/daily-goggles/tasks"
 )
 
-type Delete struct{ config cmds.Config }
+type Delete struct{ resources cmds.Resources }
 
-func New(config cmds.Config) cmds.Command { return Delete{config} }
+func New(resources cmds.Resources) cmds.Command { return Delete{resources} }
 func (c Delete) Execute(args []string) error {
-	if c.config.StoreFilename == "" {
-		return errors.New("empty store filename")
-	}
 	if len(args) == 0 {
 		return errors.New("missing task index")
 	}
@@ -25,21 +23,20 @@ func (c Delete) Execute(args []string) error {
 	if err != nil {
 		return errors.New("index argument not an integer")
 	}
-	db, err := cmds.Open(c.config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	repo := store.NewTaskRepo(db)
-	task, err := repo.Get(context.Background(), i)
+	var task tasks.Task
+	err = c.resources.DB.Tx(context.Background(), func(tasksRepo store.TaskRepo, _ store.HistoryRepo) error {
+		var err error
+		task, err = tasksRepo.Get(context.Background(), i)
+		if err != nil {
+			return err
+		}
+		return tasksRepo.Delete(context.Background(), i)
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		fmt.Println("no task at this index")
 		return nil
 	}
 	if err != nil {
-		return err
-	}
-	if err := repo.Delete(context.Background(), i); err != nil {
 		return err
 	}
 	fmt.Println("Deleted: " + task.Name)

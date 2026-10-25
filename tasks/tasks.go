@@ -9,8 +9,9 @@ import (
 type TaskState string
 
 const (
-	Todo TaskState = "todo"
-	Done TaskState = "done"
+	Todo       TaskState = "todo"
+	InProgress TaskState = "in-progress"
+	Done       TaskState = "done"
 )
 
 type Task struct {

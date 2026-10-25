@@ -9,16 +9,11 @@ import (
 	"github.com/mikepepping/daily-goggles/store"
 )
 
-type Clean struct{ config cmds.Config }
+type Clean struct{ resources cmds.Resources }
 
-func New(config cmds.Config) cmds.Command { return Clean{config} }
+func New(resources cmds.Resources) cmds.Command { return Clean{resources} }
 func (c Clean) Execute(_ []string) error {
-	db, err := cmds.Open(c.config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	err = db.Tx(context.Background(), func(t store.TaskRepo, h store.HistoryRepo) error {
+	err := c.resources.DB.Tx(context.Background(), func(t store.TaskRepo, h store.HistoryRepo) error {
 		all, err := t.List(context.Background())
 		if err != nil {
 			return err

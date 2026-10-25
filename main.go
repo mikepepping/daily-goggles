@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/mikepepping/daily-goggles/cmds"
+	begin "github.com/mikepepping/daily-goggles/cmds/begin"
 	clean "github.com/mikepepping/daily-goggles/cmds/clean"
 	complete "github.com/mikepepping/daily-goggles/cmds/complete"
 	delete "github.com/mikepepping/daily-goggles/cmds/delete"
@@ -14,9 +15,10 @@ import (
 	insert "github.com/mikepepping/daily-goggles/cmds/insert"
 	print "github.com/mikepepping/daily-goggles/cmds/print"
 	wipe "github.com/mikepepping/daily-goggles/cmds/wipe"
+	"github.com/mikepepping/daily-goggles/store"
 )
 
-func getCmd(name string, config cmds.Config) (cmds.Command, error) {
+func getCmd(name string, resources cmds.Resources) (cmds.Command, error) {
 	availableCmds := map[string]cmds.BuildFunc{
 		"list":     print.New,
 		"ls":       print.New,
@@ -24,6 +26,8 @@ func getCmd(name string, config cmds.Config) (cmds.Command, error) {
 		"add":      insert.New,
 		"insert":   insert.New,
 		"complete": complete.New,
+		"begin":    begin.New,
+		"start":    begin.New,
 		"delete":   delete.New,
 		"remove":   delete.New,
 		"clean":    clean.New,
@@ -36,7 +40,7 @@ func getCmd(name string, config cmds.Config) (cmds.Command, error) {
 		return nil, errors.New("command not found")
 	}
 
-	return buildFunc((config)), nil
+	return buildFunc(resources), nil
 }
 
 func main() {
@@ -52,12 +56,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	var config = cmds.Config{
-		StorePath:     filepath.Join(homeDir, ".daily-goggles"),
-		StoreFilename: "store.db",
+	db, err := store.Open(filepath.Join(homeDir, ".daily-goggles", "store.db"))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer db.Close()
+	resources := cmds.Resources{
+		Tasks:   store.NewTaskRepo(db),
+		History: store.NewHistoryRepo(db),
+		DB:      db,
 	}
 
-	cmd, err := getCmd(cmdArgs[0], config)
+	cmd, err := getCmd(cmdArgs[0], resources)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

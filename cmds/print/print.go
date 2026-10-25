@@ -2,30 +2,20 @@ package printcmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/mikepepping/daily-goggles/cmds"
-	"github.com/mikepepping/daily-goggles/store"
 	"github.com/mikepepping/daily-goggles/tasks"
 	"github.com/mikepepping/daily-goggles/termtables"
 )
 
-type Print struct{ config cmds.Config }
+type Print struct{ resources cmds.Resources }
 
-func New(config cmds.Config) cmds.Command { return Print{config} }
+func New(resources cmds.Resources) cmds.Command { return Print{resources} }
 
 func (c Print) Execute(_ []string) error {
-	if c.config.StoreFilename == "" {
-		return errors.New("empty store filename")
-	}
-	db, err := cmds.Open(c.config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	rows, err := store.NewTaskRepo(db).List(context.Background())
+	rows, err := c.resources.Tasks.List(context.Background())
 	if err != nil {
 		return err
 	}

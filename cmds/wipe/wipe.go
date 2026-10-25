@@ -2,28 +2,37 @@ package wipecmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/mikepepping/daily-goggles/cmds"
+	"github.com/mikepepping/daily-goggles/store"
 )
 
-type Wipe struct{ config cmds.Config }
+type Wipe struct{ resources cmds.Resources }
 
-func New(config cmds.Config) cmds.Command { return Wipe{config} }
+func New(resources cmds.Resources) cmds.Command { return Wipe{resources} }
 func (c Wipe) Execute(_ []string) error {
-	if c.config.StoreFilename == "" {
-		return errors.New("empty store filename")
-	}
-	db, err := cmds.Open(c.config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	_, err = db.ExecContext(context.Background(), "DELETE FROM tasks")
-	if err == nil {
-		_, err = db.ExecContext(context.Background(), "DELETE FROM history")
-	}
+	err := c.resources.DB.Tx(context.Background(), func(tasksRepo store.TaskRepo, historyRepo store.HistoryRepo) error {
+		tasks, err := tasksRepo.List(context.Background())
+		if err != nil {
+			return err
+		}
+		for i := len(tasks) - 1; i >= 0; i-- {
+			if err := tasksRepo.Delete(context.Background(), i); err != nil {
+				return err
+			}
+		}
+		history, err := historyRepo.List(context.Background())
+		if err != nil {
+			return err
+		}
+		for i := len(history) - 1; i >= 0; i-- {
+			if err := historyRepo.Delete(context.Background(), i); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}

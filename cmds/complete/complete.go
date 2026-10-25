@@ -10,15 +10,13 @@ import (
 
 	"github.com/mikepepping/daily-goggles/cmds"
 	"github.com/mikepepping/daily-goggles/store"
+	"github.com/mikepepping/daily-goggles/tasks"
 )
 
-type Complete struct{ config cmds.Config }
+type Complete struct{ resources cmds.Resources }
 
-func New(config cmds.Config) cmds.Command { return Complete{config} }
+func New(resources cmds.Resources) cmds.Command { return Complete{resources} }
 func (c Complete) Execute(args []string) error {
-	if c.config.StoreFilename == "" {
-		return errors.New("empty store filename")
-	}
 	if len(args) == 0 {
 		return errors.New("missing task index")
 	}
@@ -26,23 +24,21 @@ func (c Complete) Execute(args []string) error {
 	if err != nil {
 		return errors.New("index argument not an integer")
 	}
-	db, err := cmds.Open(c.config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	repo := store.NewTaskRepo(db)
-	task, err := repo.Get(context.Background(), i)
+	var task tasks.Task
+	err = c.resources.DB.Tx(context.Background(), func(tasksRepo store.TaskRepo, _ store.HistoryRepo) error {
+		var err error
+		task, err = tasksRepo.Get(context.Background(), i)
+		if err != nil {
+			return err
+		}
+		task.State, task.DoneAt = tasks.Done, time.Now()
+		return tasksRepo.Update(context.Background(), i, task)
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		fmt.Println("no task at this index")
 		return nil
 	}
 	if err != nil {
-		return err
-	}
-	task.State = "done"
-	task.DoneAt = time.Now()
-	if err := repo.Update(context.Background(), i, task); err != nil {
 		return err
 	}
 	fmt.Println("Marked " + task.Name + " as done.")
